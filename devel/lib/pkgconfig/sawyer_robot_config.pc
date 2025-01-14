@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/devel
+
+Name: sawyer_robot_config
+Description: Description of sawyer_robot_config
+Version: 0.3.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

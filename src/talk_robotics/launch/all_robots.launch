@@ -1,0 +1,115 @@
+<launch>
+  
+    <arg name="robot_ns" default="talk01" />
+    <arg name="tf_prefix" default="$(arg robot_ns)_tf" />
+    <arg name="X" default="0.2" />
+    <arg name="Y" default="0.0" />
+    <arg name="Z" default="0.1"/>
+    <arg name="Yaw" default="0" />
+    <arg name="talk_base_frame_id" default="$(arg tf_prefix)/base_link"/>
+    <arg name="talk_odom_frame_id" default="$(arg tf_prefix)/odom"/>
+    <arg name="talk_scan_topic" default="/$(arg robot_ns)/front/scan"/>
+    <arg name="initial_joint_states" 
+         default=" 
+                    -J ridgeback_arm::shoulder_lift_joint -1.547
+                    -J ridgeback_arm::elbow_joint 1.57
+                    -J ridgeback_arm::wrist_2_joint 1.57"/>
+    
+    <group ns="$(arg robot_ns)">
+      <include file="$(find talk_robotics)/launch/ur5_back_sim.launch">
+        <arg name="robot_ns" value="$(arg robot_ns)"/>
+        <param name="tf_prefix" value="$(arg tf_prefix)"/>
+        <arg name="initial_joint_states" value="$(arg initial_joint_states)"/>
+        <arg name="X" value="$(arg X)" />
+        <arg name="Y" value="$(arg Y)" />
+        <arg name="Yaw" value="$(arg Yaw)" />
+        
+      </include>
+      <include file="$(find talk_robotics)/launch/amcl_talk.launch" >
+        <arg name="robot_ns" value="$(arg robot_ns)" />
+        <arg name="tf_prefix" value="$(arg tf_prefix)" />
+        <arg name="scan_topic" value="$(arg talk_scan_topic)" />
+        <arg name="odom_frame_id"   value="$(arg talk_odom_frame_id)"/>
+        <arg name="base_frame_id"   value="$(arg talk_base_frame_id)"/>
+        <arg name="initial_pose_x" value="$(arg X)" />
+        <arg name="initial_pose_y" value="$(arg Y)" />
+        <arg name="initial_pose_a" value="$(arg Yaw)" />
+      </include>
+      <include file="$(find talk_robotics)/launch/move_base_talk.launch">
+        <arg name="robot_ns" value="$(arg robot_ns)" />
+        <arg name="tf_prefix" value="$(arg tf_prefix)" />
+        <arg name="laser_topic" value="$(arg talk_scan_topic)" />
+        <arg name="odom_frame_id"   value="$(arg talk_odom_frame_id)"/>
+        <arg name="base_frame_id"   value="$(arg talk_base_frame_id)"/>
+      </include>
+      <!--<node pkg="tf" type="static_transform_publisher" name="laser_base_link_broadcaster" 
+        args="$(arg X) $(arg Y) 0.3932 $(arg Yaw) 0 0.2330  $(arg tf_prefix)/shassis_link $(arg tf_prefix)/front_laser 100" />-->
+    </group>
+
+    <!--###########################################################################################-->
+
+    <arg name="robot2_ns" default="p3dx" />
+    <arg name="tf2_prefix" default="$(arg robot2_ns)" />
+    <arg name="x" default="0.0"/>
+    <arg name="y" default="1.5"/>
+    <arg name="yaw" default="0.0"/>
+    <arg name="p3dx_scan_topic" value="/scan" />
+    <arg name="p3dx_odom_topic" value="/p3dx/RosAria/odom"/>
+    <arg name="p3dx_base_frame_id" default="$(arg tf2_prefix)/base_link"/>
+    <arg name="p3dx_odom_frame_id" default="$(arg tf2_prefix)/odom"/>
+    <group ns="$(arg robot2_ns)">
+      <param name="tf_prefix" value="$(arg tf2_prefix)"/>
+      <include file="$(find talk_robotics)/launch/spawn_p3dx.launch">
+        <arg name="x" value="$(arg x)" />
+        <arg name="y" value="$(arg y)" />
+        <arg name="yaw" value="$(arg yaw)" />  
+      </include>
+      <!--<include file="$(find talk_robotics)/launch/amcl_talk.launch" >-->
+      <include file="$(find talk_robotics)/launch/amcl_p3dx.launch" >
+        <arg name="scan_topic" value="$(arg p3dx_scan_topic)" />
+        <arg name="odom_frame_id"   value="$(arg p3dx_odom_frame_id)"/>
+        <arg name="base_frame_id"   value="$(arg p3dx_base_frame_id)"/>
+        <arg name="initial_pose_x" value="$(arg x)" />
+        <arg name="initial_pose_y" value="$(arg y)" />
+        <arg name="initial_pose_a" value="$(arg yaw)" />
+      </include>
+      <include file="$(find talk_robotics)/launch/move_base_talk.launch">
+        <arg name="laser_topic" value="$(arg p3dx_scan_topic)" />
+        <arg name="odom_frame_id"   value="$(arg p3dx_odom_frame_id)"/>
+        <arg name="base_frame_id"   value="$(arg p3dx_base_frame_id)"/>
+        <arg name="odom_topic" value="$(arg p3dx_odom_topic)"/>
+        <!--<remap from="cmd_vel" to="/p3dx/RosAria/cmd_vel"/>-->
+        <!--<remap from="/move_base_simple/goal" to="/p3dx/move_base_simple/goal"/>-->
+        <!--<remap from="/move_base_simple/goal" to="/p3dx/move_base_simple/goal"/>-->
+      </include>
+    
+    </group>
+
+
+    <!--########################################################################################-->
+
+    <arg name="robot3_ns" default="ur5" />
+    <arg name="tf3_prefix" default="$(arg robot3_ns)" />
+    <arg name="ur_x" default="7.5" />
+    <arg name="ur_y" default="5" />
+    <arg name="ur_z" default="0.8" />
+    <arg name="ur_yaw" default="-1.57" />
+    <arg name="ur_initial_joint_states" 
+         default=" 
+                    -J ur5::shoulder_lift_joint -1.547
+                    -J ur5::elbow_joint 1.57
+                    -J ur5::wrist_2_joint 1.57"/>
+    
+    
+    <group ns="$(arg robot3_ns)">
+      <param name="tf_prefix" value="$(arg tf3_prefix)"/>
+      <include file="$(find talk_robotics)/launch/ur5_sim.launch">
+        <arg name="x" value="$(arg ur_x)" />
+        <arg name="y" value="$(arg ur_y)" />
+        <arg name="yaw" value="$(arg ur_yaw)" /> 
+        <arg name="initial_joint_states" value="$(arg ur_initial_joint_states)"/> 
+      </include>
+      
+    </group>
+
+  </launch>

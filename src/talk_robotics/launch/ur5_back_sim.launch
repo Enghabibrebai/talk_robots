@@ -1,0 +1,93 @@
+<launch>
+  
+  <arg name="robot_ns" default="talk00"/>
+  <arg name="tf_prefix" default="$(arg robot_ns)_tf"/>
+  <arg name="robot_name" default="ridgeback_arm" />
+  <arg name="config" default="$(optenv RIDGEBACK_CONFIG base_sick)" />
+  <arg name="X" default="0" />
+  <arg name="Y" default="0" />
+  <arg name="Z" default="0.1" />
+  <arg name="Yaw" default="0" />
+  <arg name="initial_joint_states" 
+         default=" 
+                    -J ridgeback_arm::shoulder_lift_joint -1.547
+                    -J ridgeback_arm::elbow_joint 1.57
+                    -J ridgeback_arm::wrist_2_joint 1.57"/>
+  
+  <!-- Load robot description -->
+  <param name="robot_description" 
+         command="$(find talk_robotics)/scripts/env_run
+                  $(find talk_robotics)/urdf/configs/$(arg config)
+                  $(find xacro)/xacro --inorder $(find talk_robotics)/urdf/ur5_back.urdf.xacro
+                  robot_ns:=$(arg robot_ns)
+                  tf_prefix:=$(arg tf_prefix)
+                  " />
+  
+  <node name="talk_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="rate" type="double" value="50.0" />
+    
+  </node>
+    
+  <node name="talk_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+    <param name="rate" type="double" value="50.0" />
+  </node>
+  
+  
+  <!-- Load controller configuration -->
+  <rosparam command="load" file="$(find talk_robotics)/config/control.yaml" />
+  <!--<rosparam param="ridgeback_velocity_controller/base_frame_id" subst_value="True">$(arg tf_prefix)/base_link</rosparam>
+  <rosparam param="ridgeback_velocity_controller/odom_frame_id" subst_value="True">$(arg tf_prefix)/odom</rosparam>-->
+  <rosparam param="talk_ekf_localization/odom0" subst_value="True">odom</rosparam>
+  <rosparam param="talk_ekf_localization/imu0" subst_value="True">$(arg robot_ns)/imu/data</rosparam>
+  <rosparam param="talk_ekf_localization/odom_frame" subst_value="True">$(arg tf_prefix)/odom</rosparam>
+  <rosparam param="talk_ekf_localization/base_link_frame" subst_value="True">$(arg tf_prefix)/base_link</rosparam>
+  <rosparam param="talk_ekf_localization/world_frame" subst_value="True">$(arg tf_prefix)/odom</rosparam>
+  
+  
+  <!-- Spawn controllers -->
+  <node name="controller_spawner_ridgeback" pkg="controller_manager" type="spawner" 
+        args="ridgeback_joint_publisher ridgeback_velocity_controller"/>
+  
+  <!-- Start EKF for localization -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="talk_ekf_localization">
+    
+  </node>
+
+  <node pkg="topic_tools" type="relay" name="cmd_vel_relay"
+        args="/$(arg robot_ns)/cmd_vel /$(arg robot_ns)/ridgeback_velocity_controller/cmd_vel" />
+  
+  <rosparam param="gazebo_ros_control/pid_gains">
+      front_left_wheel:
+        p: 1
+        i: 0.1
+        d: 0
+      front_right_wheel:
+        p: 1
+        i: 0.1
+        d: 0
+      rear_left_wheel:
+        p: 1
+        i: 0.1
+        d: 0
+      rear_right_wheel:
+        p: 1
+        i: 0.1
+        d: 0
+  </rosparam>
+  
+  <!-- Load controllers for ur5 -->
+  <rosparam command="load" file="$(find talk_robotics)/config/ur5_gripper_controllers.yaml"/>
+  
+  <!-- Load the node controller manager -->
+  <node name="talk_controller_spawner_ur5" pkg="controller_manager" type="spawner"  
+        output="screen" respawn="false" 
+        args="joint_state_controller
+              ur5_arm_controller
+              gripper_controller
+              --timeout 60 ">       
+  </node>
+  <!-- Spawn robot in gazebo -->
+  <node name="talk_urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" 
+        args="-param robot_description -urdf -model $(arg robot_name) -x $(arg X) -y $(arg Y) -z $(arg Z) -Y $(arg Yaw) $(arg initial_joint_states)" output="screen"/>
+  
+</launch>

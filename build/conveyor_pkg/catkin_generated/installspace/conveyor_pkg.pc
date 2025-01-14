@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/install
+
+Name: conveyor_pkg
+Description: Description of conveyor_pkg
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

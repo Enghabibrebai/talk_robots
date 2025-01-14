@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/devel
+
+Name: ridgeback_gazebo_plugins
+Description: Description of ridgeback_gazebo_plugins
+Version: 0.2.0
+Cflags: -I/home/habib/ros_ws/src/ridgeback_simulator/ridgeback_gazebo_plugins/include
+Libs: -L${prefix}/lib 
+Requires: roscpp std_msgs geometry_msgs nav_msgs tf message_runtime

@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/install
+
+Name: multi_ridgeback_gazebo
+Description: Description of multi_ridgeback_gazebo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

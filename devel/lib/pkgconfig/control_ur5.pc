@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/devel
+
+Name: control_ur5
+Description: Description of control_ur5
+Version: 0.0.0
+Cflags: -I/home/habib/ros_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: rospy std_msgs geometry_msgs message_runtime moveit_ros_planning_interface moveit_msgs

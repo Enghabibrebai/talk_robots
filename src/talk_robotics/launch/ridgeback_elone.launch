@@ -1,0 +1,23 @@
+<launch>
+
+    <arg name="robot_ns" default="one" />
+    <arg name="tf_prefix" default="$(arg robot_ns)_tf" />
+    <arg name="robot_name"  default="ridgeback_$(arg robot_ns)" />
+    <arg name="X" default="0.2" />
+    <arg name="Y" default="1.2" />
+    <arg name="Yaw" default="0" />
+    
+    <group ns="$(arg robot_ns)">
+      <include file="$(find talk_robotics)/launch/ridgeback_sim.launch">
+        <arg name="robot_ns" value="$(arg robot_ns)" />
+        <arg name="tf_prefix" value="$(arg tf_prefix)" />
+        <arg name="robot_name"  value="$(arg robot_name)" />
+        <arg name="X" value="$(arg X)" />
+        <arg name="Y" value="$(arg Y)" />
+        <arg name="Yaw" value="$(arg Yaw)" />
+      </include>
+      <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" 
+        args="$(arg X) $(arg Y) 0 $(arg Yaw) 0 0 map /$(arg tf_prefix)/odom 100" />
+    </group>
+  
+    </launch>

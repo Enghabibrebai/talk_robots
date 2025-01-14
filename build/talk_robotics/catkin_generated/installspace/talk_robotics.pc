@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/install
+
+Name: talk_robotics
+Description: Description of talk_robotics
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

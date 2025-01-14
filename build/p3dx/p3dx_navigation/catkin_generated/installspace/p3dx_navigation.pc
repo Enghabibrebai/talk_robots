@@ -1,0 +1,8 @@
+prefix=/home/habib/ros_ws/install
+
+Name: p3dx_navigation
+Description: Description of p3dx_navigation
+Version: 0.4.13
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

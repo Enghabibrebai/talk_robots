@@ -1,0 +1,69 @@
+<launch>
+  <arg name="robot_ns" default="one" />
+  <arg name="tf_prefix" default="$(arg robot_ns)_tf" />
+  <arg name="robot_name"/>
+  <arg name="X" default="0" />
+  <arg name="Y" default="0" />
+  <arg name="Z" default="0.1" />
+  <arg name="Yaw" default="0" />
+  <!-- Configuration of Ridgeback which you would like to simulate.
+       See ridgeback_description for details. empty / base / base_sick / dual_hokuyo_lasers / dual_sick_lasers -->
+  <arg name="config" default="$(optenv RIDGEBACK_CONFIG base_sick)" />
+
+  <!-- Load robot description -->
+  <param name="robot_description"
+         command="$(find ridgeback_description)/scripts/env_run
+                  $(find ridgeback_description)/urdf/configs/$(arg config)
+                  $(find xacro)/xacro $(find talk_robotics)/urdf/ridgeback.urdf.xacro
+                  robot_ns:=$(arg robot_ns)
+                  tf_prefix:=$(arg tf_prefix)
+                  " />
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    
+  
+  <!-- Load controller configuration -->
+  <rosparam command="load" file="$(find talk_robotics)/config/control.yaml" />
+  <rosparam param="ekf_localization/odom0" subst_value="True">odom</rosparam>
+  <rosparam param="ekf_localization/imu0" subst_value="True">imu/data</rosparam>
+  <rosparam param="ekf_localization/odom_frame" subst_value="True">$(arg tf_prefix)/odom</rosparam>
+  <rosparam param="ekf_localization/base_link_frame" subst_value="True">$(arg tf_prefix)/base_link</rosparam>
+  <rosparam param="ekf_localization/world_frame" subst_value="True">$(arg tf_prefix)/odom</rosparam>
+
+
+  <!-- Spawn controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        args="ridgeback_joint_publisher ridgeback_velocity_controller"/>
+
+  <!-- Start EKF for localization -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"></node>
+  <node pkg="topic_tools" type="relay" name="cmd_vel_relay"
+        args="/$(arg robot_ns)/cmd_vel /$(arg robot_ns)/ridgeback_velocity_controller/cmd_vel" />
+  
+  
+  <!-- <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_cmd_vel" output="screen" launch-prefix="gnome-terminal -e"/> -->
+
+  <rosparam param="gazebo_ros_control/pid_gains">
+    front_left_wheel:
+      p: 1
+      i: 0.1
+      d: 0
+    front_right_wheel:
+      p: 1
+      i: 0.1
+      d: 0
+    rear_left_wheel:
+      p: 1
+      i: 0.1
+      d: 0
+    rear_right_wheel:
+      p: 1
+      i: 0.1
+      d: 0
+  </rosparam>
+  
+  <!-- Spawn robot in gazebo -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" 
+        args="-param robot_description -urdf -model $(arg robot_name) -x $(arg X) -y $(arg Y) -z $(arg Z) -Y $(arg Yaw)" output="screen"/>
+
+</launch>

@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: sawback_description
+    relative_path: urdf/sawback.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/sawback.srdf
+  CONFIG:
+    author_name: habib
+    author_email: rebai.habib.ben.ali@gmail.com
+    generated_timestamp: 1727386613
